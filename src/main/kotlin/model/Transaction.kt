@@ -8,10 +8,10 @@ import java.math.BigDecimal
 
 data class Transaction(
     val id : String,
-    val senderAccount : String,
-    val receiverAccount : String,
+    val type : TransactionEnum,
+    val fromAccount : String?,
+    val toAccount : String?,
     val currency: CurrencyEnum,
     val amount: BigDecimal,
-    val type : TransactionEnum,
     val status: StatusEnum
 )

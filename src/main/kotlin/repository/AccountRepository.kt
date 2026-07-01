@@ -9,5 +9,6 @@ class AccountRepository {
     fun existsAccountNumber(accountNumber: String) = accounts.values.any { it.accountNumber == accountNumber }
     fun findAllAccounts(): List<Account>  = accounts.values.toList()
     fun findUserAccount(ownerId : String): List<Account> = accounts.values.filter { it.ownerId == ownerId }
+    fun findNumberAccount(accountNumber: String) = accounts.values.find { it.accountNumber == accountNumber }
 
 }
