@@ -1,9 +1,15 @@
+
 plugins {
     kotlin("jvm") version "2.3.21"
+    application
 }
 
-group = "org.example"
+group = "banking.system"
 version = "1.0-SNAPSHOT"
+
+application {
+    mainClass.set("banking.system.MainKt")
+}
 
 repositories {
     mavenCentral()
