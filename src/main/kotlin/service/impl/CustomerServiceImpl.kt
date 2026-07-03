@@ -1,5 +1,7 @@
 package banking.system.service.impl
 
+import banking.system.exception.Response
+import banking.system.exception.toSuccess
 import banking.system.model.Customer
 import banking.system.model.enum.CurrencyEnum
 import banking.system.repository.CustomerRepository
@@ -11,7 +13,7 @@ class CustomerServiceImpl (
     private val customerRepo: CustomerRepository,
     private val accountService: AccountService
 ) : CustomerService {
-    override fun register(username: String, email: String) : Customer {
+    override fun register(username: String, email: String) : Response<Customer> {
         if (customerRepo.existsByUsername(username)) {
             throw IllegalArgumentException("Customer already exists")
         }
@@ -26,7 +28,8 @@ class CustomerServiceImpl (
         customerRepo.savedUser(customer)
         accountService.createAccount(customer, CurrencyEnum.KHR)
         accountService.createAccount(customer, CurrencyEnum.USD)
-        return customer
+
+        return customer.toSuccess("User registered successfully")
     }
 
 }

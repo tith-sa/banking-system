@@ -1,5 +1,7 @@
 package banking.system.service.impl
 
+import banking.system.exception.Response
+import banking.system.exception.toSuccess
 import banking.system.model.Account
 import banking.system.model.Customer
 import banking.system.model.enum.CurrencyEnum
@@ -19,7 +21,7 @@ class AccountServiceImpl(
         owner: Customer,
         currency: CurrencyEnum,
         balance: BigDecimal
-    ): Account {
+    ): Response<Account> {
 
         val accountNumber = accountRepo.findAllAccounts().size.generatedAccountNum()
         if (accountRepo.existsAccountNumber(accountNumber)) {
@@ -33,13 +35,13 @@ class AccountServiceImpl(
             balance
         )
         accountRepo.savedAccount(account)
-        return account
+        return account.toSuccess("Created Account $currency successfully.")
     }
 
-    override fun displayUserAccounts(username: String): List<Account> {
+    override fun displayUserAccounts(username: String): Response<List<Account>> {
         val customer = customerRepo.findByUsername(username)
             ?: throw IllegalArgumentException("Username $username not found.")
         val accounts = accountRepo.findUserAccount(customer.id)
-        return accounts
+        return accounts.toSuccess("Customer $customer has ${accounts.size} accounts.")
     }
 }

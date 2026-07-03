@@ -1,9 +1,12 @@
 package banking.system.service.impl
 
+import banking.system.exception.Response
+import banking.system.exception.toSuccess
 import banking.system.model.Transaction
 import banking.system.model.enum.StatusEnum
 import banking.system.model.enum.TransactionEnum
 import banking.system.repository.AccountRepository
+import banking.system.repository.TransactionRepository
 import banking.system.service.TransactionService
 import banking.system.util.exchange
 import banking.system.util.validatedAmount
@@ -11,11 +14,12 @@ import java.math.BigDecimal
 import java.util.UUID
 
 class TransactionServiceImpl(
+    private val transactionRepo: TransactionRepository,
     private val accountRepo : AccountRepository
 ) : TransactionService {
     private val exchangeRate = 4000.toBigDecimal()
 
-    override fun deposit(toAccount: String, amount: BigDecimal): Transaction {
+    override fun deposit(toAccount: String, amount: BigDecimal): Response<Transaction> {
         amount.validatedAmount()
         val account = accountRepo.findNumberAccount(toAccount)
             ?: throw IllegalArgumentException("Account $toAccount not found.")
@@ -31,11 +35,11 @@ class TransactionServiceImpl(
             amount,
             StatusEnum.SUCCESS,
         )
-
-        return depositedAmount
+        transactionRepo.save(depositedAmount)
+        return depositedAmount.toSuccess("Deposited successfully")
     }
 
-    override fun withdraw(fromAccount: String, amount: BigDecimal): Transaction {
+    override fun withdraw(fromAccount: String, amount: BigDecimal): Response<Transaction> {
         amount.validatedAmount()
         val account = accountRepo.findNumberAccount(fromAccount)
             ?: throw IllegalArgumentException("Account $fromAccount not found.")
@@ -54,10 +58,11 @@ class TransactionServiceImpl(
             amount,
             StatusEnum.SUCCESS,
         )
-        return withdrawalAmount
+        transactionRepo.save(withdrawalAmount)
+        return withdrawalAmount.toSuccess("Withdrawal successfully")
     }
 
-    override fun transfer(fromAccount: String ,toAccount: String, amount: BigDecimal): Transaction {
+    override fun transfer(fromAccount: String ,toAccount: String, amount: BigDecimal): Response<Transaction> {
         amount.validatedAmount()
 
         val fromAccount = accountRepo.findNumberAccount(fromAccount)
@@ -92,6 +97,15 @@ class TransactionServiceImpl(
             amount,
             StatusEnum.SUCCESS,
         )
-        return transaction
+        transactionRepo.save(transaction)
+        return transaction.toSuccess("Transferred successfully")
+    }
+
+    override fun transactionHistory(accountNumber: String): Response<List<Transaction>> {
+        if (!accountRepo.existsAccountNumber(accountNumber)) {
+            throw IllegalArgumentException("Account $accountNumber not found.")
+        }
+        val transaction = transactionRepo.findByAccount(accountNumber)
+        return transaction.toSuccess("Get transaction successfully")
     }
 }
