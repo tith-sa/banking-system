@@ -1,6 +1,7 @@
 package banking.system
 
-import banking.system.exception.toFailure
+import banking.system.exception.HandleException
+import banking.system.util.toFailure
 import banking.system.repository.AccountRepository
 import banking.system.repository.CustomerRepository
 import banking.system.repository.TransactionRepository
@@ -43,8 +44,8 @@ fun main() {
 
                 try {
                     val user = customerService.register(username, email)
-                    println(user)
-                } catch (e: Exception) {
+                    println(user.message)
+                } catch (e: HandleException) {
                     println(e.toFailure(" Error: ${e.message}"))
                 }
             }
@@ -59,8 +60,9 @@ fun main() {
                     userAccounts.data?.forEach {
                         println("AccountNumber ${it.accountNumber} ${it.balance} ${it.currency}")
                     }
-                } catch (e: Exception) {
-                    println(e.toFailure("Error: ${e.message}"))
+                    println(userAccounts.message)
+                } catch (e: HandleException) {
+                    println(e.toFailure(" Error: ${e.message}"))
                 }
 
             }
@@ -73,9 +75,9 @@ fun main() {
                 val amount = reader.nextLine().toBigDecimal()
 
                 try {
-                    transactionService.deposit(accountNum,amount)
-                    println("Successfully Deposited!")
-                } catch (e: Exception) {
+                    val deposit = transactionService.deposit(accountNum,amount)
+                    println(deposit.message)
+                } catch (e: HandleException) {
                     println(e.toFailure("Error: ${e.message}"))
                 }
             }
@@ -88,10 +90,10 @@ fun main() {
                 val amount = reader.nextLine().toBigDecimal()
 
                 try {
-                    transactionService.withdraw(accountNum,amount)
-                    println("Successfully Withdrawal!")
-                }   catch (e: Exception) {
-                    println(e.toFailure("Error: ${e.message}"))
+                    val withdraw = transactionService.withdraw(accountNum,amount)
+                    println(withdraw.message)
+                }   catch (e: HandleException) {
+                    println(e.toFailure(" Error: ${e.message}"))
                 }
             }
             "5" -> {
@@ -106,10 +108,10 @@ fun main() {
                 val amount = reader.nextLine().toBigDecimal()
 
                 try {
-                    transactionService.transfer(senderAccountNum,receiverAccountNum,amount)
-                    println("Successfully Transfer!")
-                } catch (e: Exception) {
-                    println(e.toFailure("Error: ${e.message}"))
+                    val transfer = transactionService.transfer(senderAccountNum,receiverAccountNum,amount)
+                    println(transfer.message)
+                } catch (e: HandleException) {
+                    println(e.toFailure(" Error: ${e.message}"))
                 }
             }
             "6" -> {
@@ -120,10 +122,11 @@ fun main() {
                 try {
                    val history = transactionService.transactionHistory(accountNum)
                     history.data?.forEach {
-                        println(it)
+                        println("${it.type} from ${it.fromAccount} to ${it.toAccount}: ${it.amount} ${it.currency} ${it.status}")
                     }
-                } catch (e: Exception) {
-                    println(e.toFailure("Error: ${e.message}"))
+                    println(history.message)
+                } catch (e: HandleException) {
+                    println(e.toFailure(" Error: ${e.message}"))
                 }
             }
             else -> {
