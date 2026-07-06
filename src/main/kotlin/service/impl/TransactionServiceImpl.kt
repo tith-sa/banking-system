@@ -19,12 +19,15 @@ class TransactionServiceImpl(
     private val transactionRepo: TransactionRepository,
     private val accountRepo : AccountRepository
 ) : TransactionService {
-    private val exchangeRate = 4000.toBigDecimal()
+    private val exchangeRate = BigDecimal("4000")
 
     override fun deposit(toAccount: String, amount: BigDecimal): Response<Transaction> {
-        amount.validatedAmount()
+
         val account = accountRepo.findNumberAccount(toAccount)
             ?: throw NotFoundException("Account $toAccount not found.")
+
+        amount.validatedAmount(account.currency, exchangeRate)
+
         val updatedAmount = account.copy(balance = account.balance + amount)
         accountRepo.savedAccount(updatedAmount)
 
@@ -42,12 +45,15 @@ class TransactionServiceImpl(
     }
 
     override fun withdraw(fromAccount: String, amount: BigDecimal): Response<Transaction> {
-        amount.validatedAmount()
+
         val account = accountRepo.findNumberAccount(fromAccount)
             ?: throw NotFoundException("Account $fromAccount not found.")
         if (amount > account.balance) {
             throw BadRequestException("Insufficient balance.")
         }
+
+        amount.validatedAmount(account.currency, exchangeRate)
+
         val updatedAmount = account.copy(balance = account.balance - amount)
         accountRepo.savedAccount(updatedAmount)
 
@@ -65,12 +71,13 @@ class TransactionServiceImpl(
     }
 
     override fun transfer(fromAccount: String ,toAccount: String, amount: BigDecimal): Response<Transaction> {
-        amount.validatedAmount()
 
         val fromAccount = accountRepo.findNumberAccount(fromAccount)
             ?: throw NotFoundException("Account $fromAccount not found.")
         val toAccount = accountRepo.findNumberAccount(toAccount)
             ?: throw NotFoundException("Account $toAccount not found.")
+
+        amount.validatedAmount(fromAccount.currency, exchangeRate)
 
         if (fromAccount == toAccount) {
             throw BadRequestException("Cannot transfer to this account.")
