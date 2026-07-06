@@ -1,7 +1,9 @@
 package banking.system.service.impl
 
-import banking.system.exception.Response
-import banking.system.exception.toSuccess
+import banking.system.dto.Response
+import banking.system.exception.BadRequestException
+import banking.system.exception.NotFoundException
+import banking.system.util.toSuccess
 import banking.system.model.Transaction
 import banking.system.model.enum.StatusEnum
 import banking.system.model.enum.TransactionEnum
@@ -22,7 +24,7 @@ class TransactionServiceImpl(
     override fun deposit(toAccount: String, amount: BigDecimal): Response<Transaction> {
         amount.validatedAmount()
         val account = accountRepo.findNumberAccount(toAccount)
-            ?: throw IllegalArgumentException("Account $toAccount not found.")
+            ?: throw NotFoundException("Account $toAccount not found.")
         val updatedAmount = account.copy(balance = account.balance + amount)
         accountRepo.savedAccount(updatedAmount)
 
@@ -36,15 +38,15 @@ class TransactionServiceImpl(
             StatusEnum.SUCCESS,
         )
         transactionRepo.save(depositedAmount)
-        return depositedAmount.toSuccess("Deposited successfully")
+        return depositedAmount.toSuccess(message = "Deposited successfully")
     }
 
     override fun withdraw(fromAccount: String, amount: BigDecimal): Response<Transaction> {
         amount.validatedAmount()
         val account = accountRepo.findNumberAccount(fromAccount)
-            ?: throw IllegalArgumentException("Account $fromAccount not found.")
+            ?: throw NotFoundException("Account $fromAccount not found.")
         if (amount > account.balance) {
-            throw IllegalArgumentException("Insufficient balance.")
+            throw BadRequestException("Insufficient balance.")
         }
         val updatedAmount = account.copy(balance = account.balance - amount)
         accountRepo.savedAccount(updatedAmount)
@@ -59,22 +61,22 @@ class TransactionServiceImpl(
             StatusEnum.SUCCESS,
         )
         transactionRepo.save(withdrawalAmount)
-        return withdrawalAmount.toSuccess("Withdrawal successfully")
+        return withdrawalAmount.toSuccess(message = "Withdrawal successfully")
     }
 
     override fun transfer(fromAccount: String ,toAccount: String, amount: BigDecimal): Response<Transaction> {
         amount.validatedAmount()
 
         val fromAccount = accountRepo.findNumberAccount(fromAccount)
-            ?: throw IllegalArgumentException("Account $fromAccount not found.")
+            ?: throw NotFoundException("Account $fromAccount not found.")
         val toAccount = accountRepo.findNumberAccount(toAccount)
-            ?: throw IllegalArgumentException("Account $toAccount not found.")
+            ?: throw NotFoundException("Account $toAccount not found.")
 
         if (fromAccount == toAccount) {
-            throw IllegalArgumentException("Cannot transfer to this account.")
+            throw BadRequestException("Cannot transfer to this account.")
         }
         if (amount > fromAccount.balance) {
-            throw IllegalArgumentException("Insufficient balance.")
+            throw BadRequestException("Insufficient balance.")
         }
         val convertedExchangeAmount = amount.exchange(
             fromAccount.currency,
@@ -98,14 +100,14 @@ class TransactionServiceImpl(
             StatusEnum.SUCCESS,
         )
         transactionRepo.save(transaction)
-        return transaction.toSuccess("Transferred successfully")
+        return transaction.toSuccess(message = "Transferred successfully")
     }
 
     override fun transactionHistory(accountNumber: String): Response<List<Transaction>> {
         if (!accountRepo.existsAccountNumber(accountNumber)) {
-            throw IllegalArgumentException("Account $accountNumber not found.")
+            throw NotFoundException("Account $accountNumber not found.")
         }
         val transaction = transactionRepo.findByAccount(accountNumber)
-        return transaction.toSuccess("Get transaction successfully")
+        return transaction.toSuccess(message = "Get transaction successfully")
     }
 }

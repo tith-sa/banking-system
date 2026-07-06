@@ -1,7 +1,10 @@
 package banking.system.service.impl
 
-import banking.system.exception.Response
-import banking.system.exception.toSuccess
+import banking.system.dto.Response
+import banking.system.exception.BadRequestException
+import banking.system.exception.NotFoundException
+import banking.system.exception.StatusException
+import banking.system.util.toSuccess
 import banking.system.model.Account
 import banking.system.model.Customer
 import banking.system.model.enum.CurrencyEnum
@@ -25,7 +28,7 @@ class AccountServiceImpl(
 
         val accountNumber = accountRepo.findAllAccounts().size.generatedAccountNum()
         if (accountRepo.existsAccountNumber(accountNumber)) {
-            throw IllegalArgumentException("An account already exists.")
+            throw BadRequestException("An account already exists.")
         }
         val account = Account(
             UUID.randomUUID().toString(),
@@ -35,13 +38,13 @@ class AccountServiceImpl(
             balance
         )
         accountRepo.savedAccount(account)
-        return account.toSuccess("Created Account $currency successfully.")
+        return account.toSuccess(StatusException.CREATED,"Created Account $currency successfully.")
     }
 
     override fun displayUserAccounts(username: String): Response<List<Account>> {
         val customer = customerRepo.findByUsername(username)
-            ?: throw IllegalArgumentException("Username $username not found.")
+            ?: throw NotFoundException("Username $username not found.")
         val accounts = accountRepo.findUserAccount(customer.id)
-        return accounts.toSuccess("Customer $customer has ${accounts.size} accounts.")
+        return accounts.toSuccess(message = "Customer $customer has ${accounts.size} accounts.")
     }
 }

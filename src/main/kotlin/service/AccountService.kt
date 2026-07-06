@@ -1,6 +1,6 @@
 package banking.system.service
 
-import banking.system.exception.Response
+import banking.system.dto.Response
 import banking.system.model.Account
 import banking.system.model.Customer
 import banking.system.model.enum.CurrencyEnum
