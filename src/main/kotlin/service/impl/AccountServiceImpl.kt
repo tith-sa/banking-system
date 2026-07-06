@@ -45,6 +45,6 @@ class AccountServiceImpl(
         val customer = customerRepo.findByUsername(username)
             ?: throw NotFoundException("Username $username not found.")
         val accounts = accountRepo.findUserAccount(customer.id)
-        return accounts.toSuccess(message = "Customer $customer has ${accounts.size} accounts.")
+    return accounts.toSuccess(message = "Customer ${customer.username} has ${accounts.size} accounts.")
     }
 }

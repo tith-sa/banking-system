@@ -44,7 +44,7 @@ fun main() {
 
                 try {
                     val user = customerService.register(username, email)
-                    println(user.message)
+                    println(user)
                 } catch (e: HandleException) {
                     println(e.toFailure(" Error: ${e.message}"))
                 }
@@ -56,11 +56,7 @@ fun main() {
 
                 try {
                     val userAccounts = accountService.displayUserAccounts(username)
-
-                    userAccounts.data?.forEach {
-                        println("AccountNumber ${it.accountNumber} ${it.balance} ${it.currency}")
-                    }
-                    println(userAccounts.message)
+                    println(userAccounts)
                 } catch (e: HandleException) {
                     println(e.toFailure(" Error: ${e.message}"))
                 }
@@ -121,10 +117,7 @@ fun main() {
 
                 try {
                    val history = transactionService.transactionHistory(accountNum)
-                    history.data?.forEach {
-                        println("${it.type} from ${it.fromAccount} to ${it.toAccount}: ${it.amount} ${it.currency} ${it.status}")
-                    }
-                    println(history.message)
+                    println(history)
                 } catch (e: HandleException) {
                     println(e.toFailure(" Error: ${e.message}"))
                 }

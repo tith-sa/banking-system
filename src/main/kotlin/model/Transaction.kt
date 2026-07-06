@@ -14,4 +14,14 @@ data class Transaction(
     val currency: CurrencyEnum,
     val amount: BigDecimal,
     val status: StatusEnum
-)
+){
+    override fun toString(): String {
+        return """
+            Type: $type
+            From: $fromAccount
+            To: $toAccount
+            Amount: $amount $currency
+            Status: $status
+        """
+    }
+}

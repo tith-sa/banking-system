@@ -10,4 +10,11 @@ data class Account (
     val accountNumber: String,
     val currency: CurrencyEnum,
     val balance: BigDecimal = BigDecimal.ZERO.setScale(2),
-)
+){
+    override fun toString(): String {
+        return """
+            AccountNumber: $accountNumber
+            Balance: $balance $currency
+        """
+    }
+}
